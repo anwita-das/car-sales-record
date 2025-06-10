@@ -51,4 +51,6 @@ ehthumbs.db
 Desktop.ini
 
 # Uploaded images or assets
-uploads/
+**/uploads/
+
+.env 
