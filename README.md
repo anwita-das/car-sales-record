@@ -1,6 +1,6 @@
 # 🚗 Car Sales Dashboard
 
-A full-stack web application to manage and visualize car sales records. Built with **React (Vite)**, **Tailwind CSS**, **shadcn/ui**, **Node.js (Express)**, and **MySQL**.
+A full-stack web application to manage and visualize car sales records. Built with **React (Vite)**, **Tailwind CSS**, **shadcn/ui**, **Node.js (Express)**, **Sequelize ORM** and **MySQL**.
 
 ---
 
@@ -20,6 +20,9 @@ A full-stack web application to manage and visualize car sales records. Built wi
 - MySQL database for data persistence
 - Multer for image upload handling
 - API routes for generating aggregate sales statistics
+- API routes for:
+  - Paginated, searched, and sorted data
+  - Generating aggregate sales statistics (e.g., most common car make, average price, etc.)
 
 ---
 
@@ -28,10 +31,30 @@ A full-stack web application to manage and visualize car sales records. Built wi
 | Layer     | Tech                     |
 |-----------|--------------------------|
 | Frontend  | React, Vite, Tailwind CSS, shadcn/ui |
-| Backend   | Node.js, Express         |
+| Backend   | Node.js, Express, Sequelize ORM      |
 | Database  | MySQL                    |
 | Charts    | ECharts (via `echarts-for-react`) |
 | Uploads   | Multer                   |
+
+---
+
+## 📊 Features in Detail
+
+- **Paginated Listings**: View car sales in a clean, paginated layout. Both client-side and server-side pagination modes are supported for flexibility and performance.
+
+- **Search by Make & Model**: Use the search bar to quickly find cars by their make (e.g., Toyota) or model (e.g., Swift). Works seamlessly with server-side pagination.
+
+- **Sorting Options**: Sort cars by price (low-to-high or high-to-low), manufacturing year (old-to-new or new-to-old), or make (A–Z or Z–A) using a sleek dropdown menu.
+
+- **Add & Edit Records**: Easily add new car sale entries or update existing ones with a user-friendly form interface. Receipt image upload is optional.
+
+- **Sales Summary Dashboard**:
+  - Total sales count and total revenue
+  - Average car price
+  - Most common car make and manufacturing year
+  - Visual insights via pie charts and detailed tables
+
+- **Responsive Design**: Works great on desktops, tablets, and smaller screens using Tailwind CSS and responsive layout techniques.
 
 ---
 
@@ -65,7 +88,14 @@ CREATE DATABASE car_sales_db;
 * Update your pool.js file to use environment variables instead of hardcoded credentials.
 * Add .env to your .gitignore file.
 
-### 4. Start the Application
+### 4. Sequelize Setup (One-time)
+Sync Sequelize models to create the cars table
+```bash
+cd backend
+node sequelize/sync.js
+```
+
+### 5. Start the Application
 
 Development Mode:
 ```bash
@@ -92,3 +122,4 @@ node server.js
 * shadcn/ui for the beautiful UI components
 * ECharts for powerful data visualization
 * Tailwind CSS for utility-first styling
+* Sequelize – elegant SQL ORM for Node.js
