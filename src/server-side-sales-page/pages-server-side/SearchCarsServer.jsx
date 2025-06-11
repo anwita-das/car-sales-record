@@ -23,8 +23,22 @@ function SearchCarsServer() {
   useEffect(() => {
     async function loadCars() {
       try {
-        const data = await fetchCarsServer(currentPage, 12, searchTerm, sortOption);
-        setCars(data.cars || []);
+        let sortBy = 'id';
+        let order = 'asc';
+        if (sortOption) {
+          const [field, dir] = sortOption.split('-');
+          sortBy = field;
+          order = dir;
+        }
+
+        // Use searchTerm as a filter for "make" (adjustable)
+        const filters = {};
+        if (searchTerm) {
+          filters.make = searchTerm;
+        }
+
+        const data = await fetchCarsServer(currentPage, 12, filters, sortBy, order);
+        setCars(data.data || []);
         setTotal(data.total || 0);
       } catch (error) {
         console.error('Failed to fetch cars:', error);
@@ -72,7 +86,12 @@ function SearchCarsServer() {
         <AddCar />
       </div>
 
-      <CarListServer cars={cars} total={total} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+      <CarListServer
+        cars={cars}
+        total={total}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+      />
     </div>
   );
 }

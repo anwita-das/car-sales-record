@@ -1,13 +1,16 @@
 import express from 'express';
-import pool from '../pool.js';
+import Car from '../sequelize/models/car.js';
+import sequelize from '../sequelize/sequelize.js';
+import { Op } from 'sequelize';
+
 
 const router = express.Router();
 
 // GET all cars
 router.get('/', async (req, res) => {
   try {
-    const [rows] = await pool.query('SELECT * FROM cars');
-    res.json(rows);
+    const cars = await Car.findAll();
+    res.json(cars);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -15,20 +18,9 @@ router.get('/', async (req, res) => {
 
 // POST a new car
 router.post('/', async (req, res) => {
-  const {
-    make, model, year, mileage, price,
-    fuel, color, transmission, features,
-    condition, accident, receiptImage
-  } = req.body;
-
   try {
-    const [result] = await pool.query(
-      `INSERT INTO cars (make, model, year, mileage, price, fuel, color, transmission, features, car_condition, accident, receipt_image)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [make, model, year, mileage, price, fuel, color, transmission, features, condition, accident, receiptImage]
-    );
-
-    res.status(201).json({ id: result.insertId });
+    const car = await Car.create(req.body);
+    res.status(201).json({id: car.id});
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -36,19 +28,10 @@ router.post('/', async (req, res) => {
 
 // PUT to update a car by ID
 router.put('/:id', async (req, res) => {
-  const { id } = req.params;
-  const {
-    make, model, year, mileage, price,
-    fuel, color, transmission, features,
-    condition, accident
-  } = req.body;
-
   try {
-    await pool.query(
-      `UPDATE cars SET make = ?, model = ?, year = ?, mileage = ?, price = ?, fuel = ?, color = ?, transmission = ?, features = ?, car_condition = ?, accident = ? WHERE id = ?`,
-      [make, model, year, mileage, price, fuel, color, transmission, features, condition, accident, id]
-    );
-
+    const [updated] = await Car.update(req.body, {
+      where: {id:req.params.id},
+    });
     res.json({ message: 'Car updated successfully' });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -57,13 +40,9 @@ router.put('/:id', async (req, res) => {
 
 // DELETE a car by ID
 router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
   try {
-    const [result] = await pool.query('DELETE FROM cars WHERE id = ?', [id]);
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Car not found' });
-    }
-    res.json({ message: 'Car deleted successfully' });
+    const deleted = await Car.destroy({ where: { id: req.params.id } });
+    res.json({ message: deleted ? 'Car deleted successfully' : 'Car not found' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -71,9 +50,11 @@ router.delete('/:id', async (req, res) => {
 
 router.get('/sales/year', async (req,res) => {
   try {
-    const [rows] = await pool.query(
-      'SELECT year, COUNT(*) as count FROM cars GROUP BY year ORDER BY year ASC'
-    );
+    const rows = await Car.findAll({
+      attributes: ['year', [sequelize.fn('COUNT', sequelize.col('year')), 'count']],
+      group: ['year'],
+      order: [['year', 'ASC']],
+    });
     res.json(rows);
   } catch(err) {
     res.status(500).json({error: err.message});
@@ -82,9 +63,10 @@ router.get('/sales/year', async (req,res) => {
 
 router.get('/make-sales', async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      'SELECT make, COUNT(*) as count FROM cars GROUP BY make'
-    );
+    const rows = await Car.findAll({
+      attributes: ['make', [sequelize.fn('COUNT', sequelize.col('make')), 'count']],
+      group: ['make'],
+    });
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -93,9 +75,10 @@ router.get('/make-sales', async (req, res) => {
 
 router.get('/fuel-sales', async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      'SELECT fuel, COUNT(*) as count FROM cars GROUP BY fuel'
-    );
+    const rows = await Car.findAll({
+      attributes: ['fuel', [sequelize.fn('COUNT', sequelize.col('fuel')), 'count']],
+      group: ['fuel'],
+    });
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -104,9 +87,10 @@ router.get('/fuel-sales', async (req, res) => {
 
 router.get('/transmission-sales', async (req, res) => {
   try {
-    const [rows] = await pool.query(
-      'SELECT transmission, COUNT(*) as count FROM cars GROUP BY transmission'
-    );
+    const rows = await Car.findAll({
+      attributes: ['transmission', [sequelize.fn('COUNT', sequelize.col('transmission')), 'count']],
+      group: ['transmission'],
+    });
     res.json(rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -115,28 +99,28 @@ router.get('/transmission-sales', async (req, res) => {
 
 router.get('/summary-stats', async (req, res) => {
   try {
-    const [totalCars] = await pool.query('SELECT COUNT(*) AS total FROM cars');
-    const [avgPrice] = await pool.query('SELECT AVG(price) AS avgPrice FROM cars');
-    const [commonMake] = await pool.query(`
-      SELECT make, COUNT(*) as count 
-      FROM cars 
-      GROUP BY make 
-      ORDER BY count DESC 
-      LIMIT 1
-    `);
-    const [popularYear] = await pool.query(`
-      SELECT year, COUNT(*) as count 
-      FROM cars 
-      GROUP BY year 
-      ORDER BY count DESC 
-      LIMIT 1
-    `);
+    const totalCars = await Car.count();
+    const avgPrice = await Car.findOne({
+      attributes: [[sequelize.fn('AVG', sequelize.col('price')), 'avgPrice']],
+    });
+    const commonMake = await Car.findOne({
+      attributes: ['make', [sequelize.fn('COUNT', sequelize.col('make')), 'count']],
+      group: ['make'],
+      order: [[sequelize.fn('COUNT', sequelize.col('make')), 'DESC']],
+      limit: 1,
+    });
+    const popularYear = await Car.findOne({
+      attributes: ['year', [sequelize.fn('COUNT', sequelize.col('year')), 'count']],
+      group: ['year'],
+      order: [[sequelize.fn('COUNT', sequelize.col('year')), 'DESC']],
+      limit: 1,
+    });
 
     res.json({
-      totalCars: totalCars[0].total,
-      avgPrice: Math.round(avgPrice[0].avgPrice),
-      commonMake: commonMake[0]?.make || null,
-      popularYear: popularYear[0]?.year || null,
+      totalCars,
+      avgPrice: Math.round(parseFloat(avgPrice.dataValues.avgPrice)),
+      commonMake: commonMake?.dataValues.make || null,
+      popularYear: popularYear?.dataValues.year || null,
     });
   } catch (err) {
     console.error('Error fetching summary stats:', err);
@@ -148,11 +132,9 @@ router.get('/summary-stats', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
   try {
-    const [rows] = await pool.query('SELECT * FROM cars WHERE id = ?', [id]);
-    if (rows.length === 0) {
-      return res.status(404).json({ message: 'Car not found' });
-    }
-    res.json(rows[0]);
+    const car = await Car.findByPk(req.params.id);
+    if (!car) return res.status(404).json({ message: 'Car not found' });
+    res.json(car);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

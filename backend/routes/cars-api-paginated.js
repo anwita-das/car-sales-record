@@ -1,56 +1,38 @@
 import express from 'express';
-import pool from '../pool.js';
+import Car from '../sequelize/models/car.js';
+import { Op } from 'sequelize';
 
 const router = express.Router();
 
-const allowedSortFields = ['price', 'year', 'make', 'model'];
-const allowedSortDirections = ['ASC', 'DESC'];
-
+// GET paginated, sorted, and filtered cars
 router.get('/', async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 12;
-  const offset = (page - 1) * limit;
-  const search = req.query.search?.trim() || '';
-
-  const sortQuery = req.query.sort?.trim() || '';
-  let orderByClause = '';
-
-  // Sort validation
-  if (sortQuery) {
-    const [field, direction] = sortQuery.split('-');
-    if (
-      allowedSortFields.includes(field.toLowerCase()) &&
-      allowedSortDirections.includes(direction.toUpperCase())
-    ) {
-      orderByClause = `ORDER BY ${field} ${direction.toUpperCase()}`;
-    }
-  }
-
   try {
-    // Data fetch
-    const [cars] = await pool.query(
-      `
-        SELECT * FROM cars
-        WHERE make LIKE ? OR model LIKE ?
-        ${orderByClause}
-        LIMIT ? OFFSET ?
-      `,
-      [`%${search}%`, `%${search}%`, limit, offset]
-    );
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+    const sortBy = req.query.sortBy || 'id';
+    const order = req.query.order === 'desc' ? 'DESC' : 'ASC';
 
-    // Total count
-    const [countResult] = await pool.query(
-      `
-        SELECT COUNT(*) AS total FROM cars
-        WHERE make LIKE ? OR model LIKE ?
-      `,
-      [`%${search}%`, `%${search}%`]
-    );
+    const filters = {};
+    if (req.query.make) filters.make = req.query.make;
+    if (req.query.fuel) filters.fuel = req.query.fuel;
+    if (req.query.transmission) filters.transmission = req.query.transmission;
 
-    res.json({ cars, total: countResult[0].total });
+    const { count, rows } = await Car.findAndCountAll({
+      where: filters,
+      order: [[sortBy, order]],
+      limit,
+      offset,
+    });
+
+    res.json({
+      data: rows,
+      total: count,
+      page,
+      totalPages: Math.ceil(count / limit),
+    });
   } catch (err) {
-    console.error('Error fetching cars:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: err.message });
   }
 });
 

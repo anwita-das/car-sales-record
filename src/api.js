@@ -12,14 +12,15 @@ export async function fetchCars() {
   }
 }
 
-export async function fetchCarsServer(page = 1, limit = 12, search = '', sort = '') {
+export async function fetchCarsServer(page = 1, limit = 12, filters = {}, sortBy = 'id', order = 'asc') {
   try {
     const response = await axios.get(PAGINATED_API_BASE, {
       params: {
         page,
         limit,
-        search,
-        sort,
+        sortBy,
+        order,
+        ...filters, // e.g. make, fuel, transmission
       },
     });
 
