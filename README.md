@@ -9,6 +9,7 @@ A full-stack web application to manage and visualize car sales records. Built wi
 ### Frontend
 - View paginated list of car sales (client-side & server-side modes)
 - Add/Edit car sale entries
+- Add sale entries in bulk from an Excel file
 - Optional receipt image upload (via Multer)
 - Search and filter car data
 - Summary dashboard with:
@@ -18,10 +19,11 @@ A full-stack web application to manage and visualize car sales records. Built wi
 ### Backend
 - RESTful API with CRUD operations for car records
 - MySQL database for data persistence
-- Multer for image upload handling
+- Multer for image and excel file upload handling
 - API routes for generating aggregate sales statistics
 - API routes for:
   - Paginated, searched, and sorted data
+  - Bulk insert car records from Excel file
   - Generating aggregate sales statistics (e.g., most common car make, average price, etc.)
 
 ---
@@ -47,6 +49,8 @@ A full-stack web application to manage and visualize car sales records. Built wi
 - **Sorting Options**: Sort cars by price (low-to-high or high-to-low), manufacturing year (old-to-new or new-to-old), or make (A–Z or Z–A) using a sleek dropdown menu.
 
 - **Add & Edit Records**: Easily add new car sale entries or update existing ones with a user-friendly form interface. Receipt image upload is optional.
+
+- **Excel Bulk Upload**: Upload an Excel file to bulk insert multiple car records at once. The uploaded .xlsx/.xls file is parsed on the backend and inserted into the database.
 
 - **Sales Summary Dashboard**:
   - Total sales count and total revenue
