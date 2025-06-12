@@ -5,6 +5,7 @@ import SearchCars from './pages/SearchCars';
 import CarDetails from './pages/CarDetails';
 import AddSalePage from './pages/AddSalePage';
 import EditCarPage from './pages/EditCarPage';
+import BulkUpload from './pages/BulkUpload';
 import SearchCarsServer from './server-side-sales-page/pages-server-side/SearchCarsServer';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Link to = "/" className="text-white no-underline font-bold hover:text-[#ffb300]">Dashboard</Link>
         <Link to = "/search" className="text-white no-underline font-bold hover:text-[#ffb300]">Sales</Link>
         <Link to="/search-server" className="text-white no-underline font-bold hover:text-[#ffb300] ">Sales (Server)</Link>
+        <Link to="/upload" className="text-white no-underline font-bold hover:text-[#ffb300]">Bulk Upload</Link>
       </nav>
 
       <Routes>
@@ -26,6 +28,7 @@ function App() {
         <Route path="/add" element={<AddSalePage />} />
         <Route path="/edit/:id" element={<EditCarPage/>} />
         <Route path="/search-server" element={<SearchCarsServer />} />
+        <Route path="/upload" element={<BulkUpload />} />
       </Routes>
     </div>
   );

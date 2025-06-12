@@ -66,3 +66,19 @@ export async function fetchSummaryStats() {
     throw new Error('Failed to fetch summary stats');
   }
 }
+
+export async function uploadExcel(file) {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  try {
+    const res = await axios.post(`${API_BASE}/upload-excel`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    return res.data;
+  } catch (error) {
+    throw new Error('Failed to upload Excel file');
+  }
+}
