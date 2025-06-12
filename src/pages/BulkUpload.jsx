@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import axios from 'axios';
+import { uploadExcel } from '../api';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -16,20 +16,18 @@ function BulkUpload() {
     e.preventDefault();
 
     if (!file) {
-      setMessage('Please select an Excel file.');
-      return;
+        setMessage('Please select an Excel file.');
+        return;
     }
-
-    const formData = new FormData();
-    formData.append('file', file); // 'file' must match upload.single('file')
 
     try {
-      const res = await axios.post('/upload-excel', formData);
-      setMessage(res.data.message || 'Upload successful!');
+        const result = await uploadExcel(file);
+        setMessage(result.message || 'Upload successful!');
     } catch (err) {
-      setMessage(err.response?.data?.error || 'Upload failed.');
+        setMessage(err.message || 'Upload failed.');
     }
-  };
+    };
+
 
   return (
     <div className="max-w-xl mx-auto mt-10 p-6 bg-white rounded-xl shadow-md">

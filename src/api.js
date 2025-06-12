@@ -72,7 +72,7 @@ export async function uploadExcel(file) {
   formData.append('file', file);
 
   try {
-    const res = await axios.post(`${API_BASE}/upload-excel`, formData, {
+    const res = await axios.post('http://localhost:3000/api/upload-excel', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

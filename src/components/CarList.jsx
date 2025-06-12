@@ -18,7 +18,7 @@ function CarList({ cars, currentPage, setCurrentPage }) {
 
   return (
     <>
-      <div className="flex flex-wrap justify-between p-3">
+      <div className="flex flex-wrap justify-centre p-3">
         {selectedCars.length === 0 ? (
           <p>No cars found.</p>
         ) : (
