@@ -32,9 +32,9 @@ A full-stack web application to manage and visualize car sales records. Built wi
 |-----------|--------------------------|
 | Frontend  | React, Vite, Tailwind CSS, shadcn/ui |
 | Backend   | Node.js, Express, Sequelize ORM      |
-| Database  | MySQL                    |
-| Charts    | ECharts (via `echarts-for-react`) |
-| Uploads   | Multer                   |
+| Database  | MySQL                                |
+| Charts    | ECharts (via `echarts-for-react`)    |
+| Uploads   | Multer (image + Excel file handling) |
 
 ---
 
@@ -62,7 +62,7 @@ A full-stack web application to manage and visualize car sales records. Built wi
 
 Prerequisites
 
-* Node.js (v16 or higher)
+* Node.js (v22 tested and supported)
 * MySQL (v8.0 or higher)
 * Git
 
@@ -101,7 +101,7 @@ Development Mode:
 ```bash
 # Terminal 1: Start the backend server
 cd backend
-nodemon server.js
+nodemon index.js
 
 # Terminal 2: Start the frontend (in root directory)
 npm run dev
@@ -114,7 +114,7 @@ npm run build
 
 # Start backend production server
 cd backend
-node server.js
+node index.js
 ```
 
 🙏 Acknowledgments
